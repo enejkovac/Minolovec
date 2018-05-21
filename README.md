@@ -1,0 +1,2 @@
+# Minolovec
+UVP - projektna naloga
