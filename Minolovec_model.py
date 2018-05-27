@@ -33,43 +33,20 @@ class Polje:
                     matrika_z_minami[nakljucna_vrstica][nakljucen_stolpec] = 1
                     stevilo_min -= 1
             return matrika_z_minami
+
+    def sosede(self, i, j):
+        polje = self.postavi_mine()
+        sosede = 0
+        for vrstica in range(i-1, i+2):
+            for stolpec in range(j-1, j+2):
+                if (vrstica == i) and (stolpec == j): # sama sebi ni sosed
+                    continue
+                if ((vrstica < 0) or (vrstica > self.vrstice-1) or (stolpec < 0) or (stolpec > self.stolpci-1)):
+                # smo izven matrike
+                    continue
+                if polje[vrstica][stolpec] == 1: # mina!
+                    sosede += 1 
+        return sosede
         
                     
 
-    
-
-
-
-
-#class Bomba:
-#
-#    #polozaj() = vrstica, stolpec
-#    
-#    def __init__(self, vrstica, stolpec):
-#        self.vrstica = vrstica
-#        self.stolpec = stolpec
-#
-#    def __repr__(self):
-#        vrstica, stolpec = self.polozaj()
-#        return '{}(vrstica={}, stolpec={})'.format(self.__class__.__name__, vrstica, stolpec)
-#
-#    def polozaj(self):
-#        return self.vrstica, self.stolpec
-#
-#
-#class Stevilo:
-#
-#    #podatki() = vrstica, stolpec, cifra
-#    
-#    def __init__(self, vrstica, stolpec, cifra):
-#        self.vrstica = vrstica
-#        self.stolpec = stolpec
-#        self.cifra = cifra
-#
-#    def __repr__(self):
-#        vrstica, stolpec, cifra = self.podatki()
-#        return ('{}(vrstica={}, stolpec={}, cifra={})'.format(self.__class__.__name__,
-#                                                              vrstica, stolpec, cifra))
-#    def podatki(self):
-#        return self.vrstica, self.stolpec, self.cifra
-    
