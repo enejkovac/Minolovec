@@ -34,8 +34,7 @@ class Polje:
                     stevilo_min -= 1
             return matrika_z_minami
 
-    def sosede(self, i, j):
-        polje = self.postavi_mine()
+    def sosede(self, i, j, matrika):
         sosede = 0
         for vrstica in range(i-1, i+2):
             for stolpec in range(j-1, j+2):
@@ -44,7 +43,7 @@ class Polje:
                 if ((vrstica < 0) or (vrstica > self.vrstice-1) or (stolpec < 0) or (stolpec > self.stolpci-1)):
                 # smo izven matrike
                     continue
-                if polje[vrstica][stolpec] == 1: # mina!
+                if matrika[vrstica][stolpec] == 1: # mina
                     sosede += 1 
         return sosede
         
