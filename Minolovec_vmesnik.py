@@ -7,10 +7,10 @@ import time
 
 VRSTICE = 15
 STOLPCI = 15
-STEVILO_MIN = 60
+STEVILO_MIN = 30
 SIRINA_KVADRATKA = 2
 VISINA_KVADRATKA = 1
-MINA = '*'
+MINA = '●'
 ZASTAVA = '?'
 BARVA_GUMBA = '#D3D3D3'
 BARVE = ['#FFFFFF', '#0000FF', '#008200', '#FF0000', '#000084', '#840000', '#008284', '#840084', '#000000']
@@ -21,116 +21,159 @@ class Minolovec:
         okno = tk.Tk()
         okno.title('Minolovec')
         
-        self.cas = 0
         self.konec_igre = False
+        self.prvi_klik = False
 
+        self.vrstice = VRSTICE
+        self.stolpci = STOLPCI
+        self.stevilo_min = STEVILO_MIN
+        self.mina = MINA
+        self.zastava = ZASTAVA
+        self.barva_gumba = BARVA_GUMBA
+        self.barve = BARVE
+        self.font = ('times', 10, 'bold')
+        
+        ## Igralno Polje ##
         self.gumbi = []
-        for i in range(VRSTICE):
+        for i in range(self.vrstice):
             vrstica = []
-            for j in range(STOLPCI):
+            for j in range(self.stolpci):
                 gumb = tk.Button(okno, text=' ', width=SIRINA_KVADRATKA, command=lambda i=i, j=j: self.levi_klik(i, j))
                 gumb.bind('<Button-3>', lambda e, i=i, j=j: self.desni_klik(i, j))
                 gumb.grid(row=i+2, column=j, sticky=tk.N+tk.W+tk.S+tk.E)
                 vrstica.append(gumb)
             self.gumbi.append(vrstica)
+
+        meni = tk.Menu(okno)
+        okno.config(menu=meni)
+        meni.add_cascade(label='Velikost polja')
             
         self.nova_igra()
         
-        cas = tk.Label(okno, text=str(self.cas))
-        restart = tk.Button(okno, text='Restart', command=self.nova_igra)
-        cas.grid(row=1, column=STOLPCI // 2)
-        restart.grid(row=0, column=0, columnspan=STOLPCI, sticky=tk.N+tk.W+tk.S+tk.E)
+        self.vrednost_casa = 0
+        self.prikaz_casa = tk.Label(okno, text=str(self.vrednost_casa))
+        self.prikaz_casa.grid(row=1, column=0, columnspan=self.stolpci)
+
+        restart = tk.Button(okno, text='Nova igra', command=self.nova_igra)
+        restart.grid(row=0, column=0, columnspan=self.stolpci, sticky=tk.N+tk.W+tk.S+tk.E)
         
         okno.mainloop()
     
         
     def nova_igra(self):
-        self.polje = model.Polje(VRSTICE, STOLPCI, STEVILO_MIN)
+        self.polje = model.Polje(self.vrstice, self.stolpci, self.stevilo_min)
         self.matrika = self.polje.postavi_mine()
         self.konec_igre = False
+        self.prvi_klik = False
+        self.vrednost_casa = 0
 
-        for vrstica in range(len(self.gumbi)):
-            for stolpec in range(len(self.gumbi[vrstica])):
-                self.gumbi[vrstica][stolpec].config(relief=tk.RAISED)
-                self.gumbi[vrstica][stolpec]['state'] = 'normal'
-                self.gumbi[vrstica][stolpec]['text'] = ' '
-                self.gumbi[vrstica][stolpec].config(background=BARVA_GUMBA)
-
-
-    def osvezi_cas(self):
-        self.cas += 1
-        self.cas.after(1000, self.osvezi_cas)
-        return self.cas
+        for i in range(len(self.gumbi)):
+            for j in range(len(self.gumbi[i])):
+                self.gumbi[i][j].config(relief=tk.RAISED)
+                self.gumbi[i][j]['state'] = 'normal'
+                self.gumbi[i][j]['text'] = ' '
+                self.gumbi[i][j].config(background=self.barva_gumba)
 
     def levi_klik(self, i, j):
-        if self.konec_igre:
-            return None
-        elif self.matrika[i][j] == 1:
-            self.gumbi[i][j]['text'] = MINA
-            self.gumbi[i][j].config(background='red', disabledforeground='black')
-            self.konec_igre = True
-            tk.messagebox.showinfo('Game Over', 'You have lost.')
-            #pokazi vse mine
-            for _i in range(0, VRSTICE):
-                    for _j in range(STOLPCI):
-                        if self.matrika[_i][_j] == 1:
-                            self.gumbi[_i][_j]['text'] = MINA
-
+        self.prvi_klik = True
+        #self.osvezi_cas()
+        if self.matrika[i][j] == 1:
+            self.pokazi_mino(i, j)                            
         elif self.polje.sosede(i, j, self.matrika) == 0:
-            self.gumbi[i][j]['text'] = ' '
-            #sedaj še za vsa polja, ki nimajo sosed
-            self.auto_klik(i, j)
-            self.gumbi[i][j]['state'] = 'disabled'
-            self.gumbi[i][j].config(relief=tk.SUNKEN)
-            self.zmaga()
-       
+            self.auto_klik(i, j)       
         else: #self.polje[i][j] == cifra
-            cifra = self.polje.sosede(i, j, self.matrika)
-            self.gumbi[i][j]['text'] = str(cifra)
-            self.gumbi[i][j].config(disabledforeground=BARVE[cifra])
-            self.gumbi[i][j]['state'] = 'disabled'
-            self.zmaga()
-       
+            self.pokazi_cifro(i, j)
+
     def auto_klik(self, i, j):
         if self.gumbi[i][j]['state'] == 'disabled':
             return None
         elif self.polje.sosede(i, j, self.matrika) == 0:
-            self.gumbi[i][j]['text'] = ' '
-            self.gumbi[i][j].config(relief=tk.SUNKEN)
-            self.gumbi[i][j]['state'] = 'disabled'
+            self.pokazi_prazno_polje(i, j)
             for x in range(i-1, i+2):
                     for y in range(j-1, j+2):
                             if (x == i) and (y == j):
                                 continue
-                            elif (x < 0) or (x > VRSTICE-1) or (y < 0) or (y > STOLPCI-1):
+                            elif (x < 0) or (x > self.vrstice-1) or (y < 0) or (y > self.stolpci-1):
                                 continue
                             else:
                                 self.auto_klik(x, y)
         else: #self.polje[i][j] == cifra
-            cifra = self.polje.sosede(i, j, self.matrika)
-            self.gumbi[i][j]['text'] = str(cifra)
-            self.gumbi[i][j].config(disabledforeground=BARVE[cifra])
-            self.gumbi[i][j]['state'] = 'disabled'
+            self.pokazi_cifro(i, j)
 
     def desni_klik(self, i, j):
+        self.prvi_klik = True
+        #self.osvezi_cas()
         if self.konec_igre:
-           return None
-        elif self.gumbi[i][j]['text'] == ZASTAVA:
+            return None
+        elif self.gumbi[i][j]['text'] == self.zastava:
             self.gumbi[i][j]['text'] = ' '
             self.gumbi[i][j]['state'] = 'normal'
+            #self.osvezi_cas()
         elif self.gumbi[i][j]['text'] == ' ' and self.gumbi[i][j]['state'] == 'normal':
-            self.gumbi[i][j]['text'] = ZASTAVA
+            self.gumbi[i][j]['text'] = self.zastava
+            self.gumbi[i][j].config(font=self.font)
             self.gumbi[i][j]['state'] = 'disabled'
+            #self.osvezi_cas()
 
     def zmaga(self):
         win = True
-        for i in range(0, VRSTICE):
-            for j in range(0, STOLPCI):
+        for i in range(len(self.gumbi)):
+            for j in range(len(self.gumbi[i])):
                 if self.matrika[i][j] != 1 and self.gumbi[i][j]['state'] == 'normal':
                     win = False
         if win:
-            tk.messagebox.showinfo('Game Over', 'You have won.')
+            tk.messagebox.showinfo('Konec igre', 'Čestitke, uspelo vam je!')
+            self.konec_igre = True
+            self.zakleni_gumbe()
 
+    def zakleni_gumbe(self):
+            for i in range(len(self.gumbi)):
+                for j in range(len(self.gumbi[i])):
+                    self.gumbi[i][j]['state'] = 'disabled'        
+
+    def pokazi_cifro(self, i, j):
+        cifra = self.polje.sosede(i, j, self.matrika)
+        self.gumbi[i][j].config(relief=tk.SUNKEN, disabledforeground=self.barve[cifra], font=self.font)
+        self.gumbi[i][j]['text'] = str(cifra)
+        self.gumbi[i][j]['state'] = 'disabled'
+        self.zmaga()
+
+    def pokazi_mino(self, i, j):
+        self.gumbi[i][j]['text'] = self.mina
+        self.gumbi[i][j].config(background='red', disabledforeground='black', font=self.font)
+        self.zakleni_gumbe()
+        self.pokazi_vse()
+        self.konec_igre = True
+        tk.messagebox.showinfo('Konec Igre', 'Žal vam ni uspelo. Poskusite ponovno.')
+
+    def pokazi_prazno_polje(self, i, j):
+        self.gumbi[i][j]['text'] = ' '
+        self.gumbi[i][j]['state'] = 'disabled'
+        self.gumbi[i][j].config(relief=tk.SUNKEN)
+        self.zmaga()
+
+    def pokazi_vse(self):
+        for i in range(len(self.gumbi)):
+            for j in range(len(self.gumbi[i])):
+                if self.matrika[i][j] == 1:
+                    self.gumbi[i][j]['text'] = self.mina
+                    self.gumbi[i][j].config(disabledforeground='black', font=self.font)
+                elif self.polje.sosede(i, j, self.matrika) == 0:
+                    self.gumbi[i][j]['text'] = ' '
+                    self.gumbi[i][j].config(relief=tk.SUNKEN)      
+                else: #self.polje[i][j] == cifra
+                    cifra = self.polje.sosede(i, j, self.matrika)
+                    self.gumbi[i][j].config(relief=tk.SUNKEN, disabledforeground=self.barve[cifra], font=self.font)
+                    self.gumbi[i][j]['text'] = str(cifra)                    
+
+    def osvezi_cas(self):
+        while not self.konec_igre:
+            self.dodaj_sekundo()
+            okno.after(1000, self.osvezi_cas)
+
+    def dodaj_sekundo(self):
+        if self.prvi_klik:
+            cas = int(self.prikaz_casa.cget('text'))
+            self.prikaz_casa.configure(text=str(cas + 1))
         
-
 Minolovec()
