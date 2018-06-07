@@ -185,11 +185,12 @@ class Minolovec:
                 if self.matrika[i][j] != 1 and self.gumbi[i][j]['state'] == 'normal':
                     self.win = False
         if self.win:
+            self.pokazi_zastave()
             self.konec_igre = True
             tk.messagebox.showinfo('Konec igre', 'Čestitke, uspelo vam je!')
-            self.zakleni_gumbe()
             self.zapisi_cas()
-
+            self.zakleni_gumbe()
+            
     def dodaj_sekundo(self):
         if self.zacetek_igre:
             cas = int(self.prikaz_casa.cget('text'))
@@ -205,5 +206,11 @@ class Minolovec:
         with open('rezultati.txt', 'a') as rezultati:
             print(('Minolovca s {0} vrsticami, {1} stolpci in {2} minami, vam je uspelo končati v {3} sekundah.'.format(
                     self.vrstice, self.stolpci, self.stevilo_min, self.vrednost_casa)), file=rezultati)
+
+    def pokazi_zastave(self):
+        for i in range(len(self.gumbi)):
+            for j in range(len(self.gumbi[i])):
+                if self.matrika[i][j] == 1:
+                    self.gumbi[i][j]['text'] = ZASTAVA
         
 Minolovec()
