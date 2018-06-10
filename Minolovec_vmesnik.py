@@ -35,7 +35,7 @@ class Minolovec:
         
         ## Igralno Polje ##
         self.gumbi = []
-        for i in range(self.vrstice):
+                       .vrstice):
             vrstica = []
             for j in range(self.stolpci):
                 gumb = tk.Button(okno, text=' ', width=SIRINA_KVADRATKA, command=lambda i=i, j=j: self.levi_klik(i, j))
