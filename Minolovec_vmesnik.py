@@ -47,21 +47,8 @@ class Minolovec:
         self.okno.configure(menu=meni)
         ## Meni ##
         
-<<<<<<< HEAD
-        ## Igralno Polje ##
-        self.gumbi = []
-                       .vrstice):
-            vrstica = []
-            for j in range(self.stolpci):
-                gumb = tk.Button(okno, text=' ', width=SIRINA_KVADRATKA, command=lambda i=i, j=j: self.levi_klik(i, j))
-                gumb.bind('<Button-3>', lambda e, i=i, j=j: self.desni_klik(i, j))
-                gumb.grid(row=i+2, column=j, sticky=tk.N+tk.W+tk.S+tk.E)
-                vrstica.append(gumb)
-            self.gumbi.append(vrstica)
-=======
         self.prikaz_casa = tk.Label(self.okno, text=str(self.vrednost_casa))
         self.prikaz_casa.pack()
->>>>>>> fa3bb2d99b5f484cbf7cbaa46761d1be38e7764b
 
 
         self.nova_igra()
@@ -217,8 +204,8 @@ class Minolovec:
 
     def zapisi_cas(self):
         with open('rezultati.txt', 'a') as rezultati:
-            print(('Minolovca s {0} vrsticami, {1} stolpci in {2} minami, vam je uspelo končati v {3} sekundah.'.format(
-                    self.vrstice, self.stolpci, self.stevilo_min, self.vrednost_casa)), file=rezultati)
+            print(('Minolovca s {0} vrsticami, {1} stolpci in {2} minami, vam je uspelo koncati v {3} sekundah.'.format(
+                self.vrstice, self.stolpci, self.stevilo_min, self.vrednost_casa)), file=rezultati)
 
     def pokazi_zastave(self):
         for i in range(len(self.gumbi)):
