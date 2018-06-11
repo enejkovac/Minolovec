@@ -6,11 +6,11 @@ from tkinter import simpledialog
 import Minolovec_model as model
 import time
 
-#sliko naredi majhno (GIMP) in pretvori v gif
 VRSTICE = 15
 STOLPCI = 15
 STEVILO_MIN = 10
 SIRINA_KVADRATKA = 2
+VISINA_KVADRATKA = 1
 MINA = '●'
 ZASTAVA = '?'
 BARVA_GUMBA = '#D3D3D3'
@@ -27,6 +27,8 @@ class Minolovec:
         self.zacetek_igre = False
         self.win = False
         self.minsko_polje = None
+        self.zastava = tk.PhotoImage(file='zastava.gif')
+        self.mina = tk.PhotoImage(file='bomba.gif')
 
         self.vrstice = VRSTICE
         self.stolpci = STOLPCI
@@ -91,7 +93,7 @@ class Minolovec:
         for i in range(self.vrstice):
             vrstica = []
             for j in range(self.stolpci):
-                gumb = tk.Button(self.minsko_polje, text=' ', width=SIRINA_KVADRATKA, command=lambda i=i, j=j: self.levi_klik(i, j))
+                gumb = tk.Button(self.minsko_polje, text=' ', height=VISINA_KVADRATKA, width=SIRINA_KVADRATKA, command=lambda i=i, j=j: self.levi_klik(i, j))
                 gumb.bind('<Button-3>', lambda e, i=i, j=j: self.desni_klik(i, j))
                 gumb.grid(row=i+2, column=j, sticky=tk.N+tk.W+tk.S+tk.E)
                 vrstica.append(gumb)
@@ -128,11 +130,11 @@ class Minolovec:
         if not self.zacetek_igre:
             self.zacetek_igre = True
             self.osvezi_cas()
-        if self.gumbi[i][j]['text'] == ZASTAVA:
+        if self.gumbi[i][j]['image'] == self.zastava:
             self.gumbi[i][j]['text'] = ' '
             self.gumbi[i][j]['state'] = 'normal'
         elif self.gumbi[i][j]['text'] == ' ' and self.gumbi[i][j]['state'] == 'normal':
-            self.gumbi[i][j]['text'] = ZASTAVA
+            self.gumbi[i][j]['image'] = self.zastava
             self.gumbi[i][j].configure(font=FONT)
             self.gumbi[i][j]['state'] = 'disabled'
 
@@ -160,10 +162,11 @@ class Minolovec:
     def pokazi_vse(self):
         for i in range(len(self.gumbi)):
             for j in range(len(self.gumbi[i])):
-                if self.matrika[i][j] == 1 and self.gumbi[i][j]['text'] != ZASTAVA:
+                if self.matrika[i][j] == 1 and self.gumbi[i][j]['image'] != self.zastava:
+                    self.gumbi[i][j]['image'] = ''
                     self.gumbi[i][j]['text'] = MINA
                     self.gumbi[i][j].configure(disabledforeground='black', font=FONT)
-                elif self.matrika[i][j] == 1 and self.gumbi[i][j]['text'] == ZASTAVA:
+                elif self.matrika[i][j] == 1 and self.gumbi[i][j]['image'] == self.zastava:
                     continue
                 elif self.polje.sosede(i, j, self.matrika) == 0:
                     self.gumbi[i][j]['text'] = ' '
@@ -211,6 +214,6 @@ class Minolovec:
         for i in range(len(self.gumbi)):
             for j in range(len(self.gumbi[i])):
                 if self.matrika[i][j] == 1:
-                    self.gumbi[i][j]['text'] = ZASTAVA
+                    self.gumbi[i][j]['image'] = self.zastava
         
 Minolovec()
