@@ -6,14 +6,11 @@ from tkinter import simpledialog
 import Minolovec_model as model
 import time
 
-VRSTICE = 15
-STOLPCI = 15
-STEVILO_MIN = 10
 SIRINA_KVADRATKA = 2
 VISINA_KVADRATKA = 1
 MINA = '●'
 ZASTAVA = '?'
-BARVA_GUMBA = '#D3D3D3'
+BARVA_GUMBA = 'gainsboro'
 BARVE = ['#FFFFFF', '#0000FF', '#008200', '#FF0000', '#000084', '#840000', '#008284', '#840084', '#000000']
 FONT = ('times', 10, 'bold')
 
@@ -27,12 +24,12 @@ class Minolovec:
         self.zacetek_igre = False
         self.win = False
         self.minsko_polje = None
-        self.zastava = tk.PhotoImage(file='zastava.gif')
-        self.mina = tk.PhotoImage(file='bomba.gif')
+        #self.zastava = tk.PhotoImage(file='zastava.gif')
+        #self.mina = tk.PhotoImage(file='bomba.gif')
 
-        self.vrstice = VRSTICE
-        self.stolpci = STOLPCI
-        self.stevilo_min = STEVILO_MIN
+        self.vrstice = None
+        self.stolpci = None
+        self.stevilo_min = None
         self.vrednost_casa = 0
         ## Spremenljivke ##
 
@@ -52,7 +49,9 @@ class Minolovec:
         self.prikaz_casa = tk.Label(self.okno, text=str(self.vrednost_casa))
         self.prikaz_casa.pack()
 
+        #self.okno.bind('r', self.nova_igra)
 
+        self.nastavi_lahka()
         self.nova_igra()
         self.okno.mainloop()
     
@@ -62,14 +61,14 @@ class Minolovec:
         self.stevilo_min = mine
         self.nova_igra()
     def nastavi_lahka(self):
-        self.nastavi_zahtevnost(7, 7, 10)
+        self.nastavi_zahtevnost(7, 7, 7)
     def nastavi_srednja(self):
-        self.nastavi_zahtevnost(14, 14, 50)
+        self.nastavi_zahtevnost(14, 14, 40)
     def nastavi_tezka(self):
         self.nastavi_zahtevnost(21, 21, 120)
     def nastavi_po_meri(self):
-        vrstice = simpledialog.askinteger('Vrstice', 'Izberi število vrstic.', parent=self.okno, minvalue=1, maxvalue=40)
-        stolpci = simpledialog.askinteger('Stolpci', 'Izberi število stolpcev.', parent=self.okno, minvalue=1, maxvalue=40)
+        vrstice = simpledialog.askinteger('Vrstice', 'Izberi število vrstic.', parent=self.okno, minvalue=1, maxvalue=30)
+        stolpci = simpledialog.askinteger('Stolpci', 'Izberi število stolpcev.', parent=self.okno, minvalue=1, maxvalue=30)
         stevilo_polj = vrstice * stolpci
         mine = simpledialog.askinteger('Mine', 'Izberi število min.', parent=self.okno, minvalue=1, maxvalue=stevilo_polj)
         self.nastavi_zahtevnost(vrstice, stolpci, mine)
@@ -93,7 +92,7 @@ class Minolovec:
         for i in range(self.vrstice):
             vrstica = []
             for j in range(self.stolpci):
-                gumb = tk.Button(self.minsko_polje, text=' ', height=VISINA_KVADRATKA, width=SIRINA_KVADRATKA, command=lambda i=i, j=j: self.levi_klik(i, j))
+                gumb = tk.Button(self.minsko_polje, text=' ', height=VISINA_KVADRATKA, width=SIRINA_KVADRATKA, background=BARVA_GUMBA, command=lambda i=i, j=j: self.levi_klik(i, j))
                 gumb.bind('<Button-3>', lambda e, i=i, j=j: self.desni_klik(i, j))
                 gumb.grid(row=i+2, column=j, sticky=tk.N+tk.W+tk.S+tk.E)
                 vrstica.append(gumb)
@@ -130,11 +129,11 @@ class Minolovec:
         if not self.zacetek_igre:
             self.zacetek_igre = True
             self.osvezi_cas()
-        if self.gumbi[i][j]['image'] == self.zastava:
+        if self.gumbi[i][j]['text'] == ZASTAVA:
             self.gumbi[i][j]['text'] = ' '
             self.gumbi[i][j]['state'] = 'normal'
         elif self.gumbi[i][j]['text'] == ' ' and self.gumbi[i][j]['state'] == 'normal':
-            self.gumbi[i][j]['image'] = self.zastava
+            self.gumbi[i][j]['text'] = ZASTAVA
             self.gumbi[i][j].configure(font=FONT)
             self.gumbi[i][j]['state'] = 'disabled'
 
@@ -151,7 +150,7 @@ class Minolovec:
         self.zakleni_gumbe()
         self.pokazi_vse()
         self.konec_igre = True
-        tk.messagebox.showinfo('Konec Igre', 'Žal vam ni uspelo. Poskusite ponovno.')
+        tk.messagebox.showinfo('Konec Igre', 'Žal vam ni uspelo. Poskusite ponovno.', icon='warning')
 
     def pokazi_prazno_polje(self, i, j):
         self.gumbi[i][j]['text'] = ' '
@@ -162,19 +161,27 @@ class Minolovec:
     def pokazi_vse(self):
         for i in range(len(self.gumbi)):
             for j in range(len(self.gumbi[i])):
-                if self.matrika[i][j] == 1 and self.gumbi[i][j]['image'] != self.zastava:
-                    self.gumbi[i][j]['image'] = ''
+                if self.matrika[i][j] == 1 and self.gumbi[i][j]['text'] != ZASTAVA:
                     self.gumbi[i][j]['text'] = MINA
                     self.gumbi[i][j].configure(disabledforeground='black', font=FONT)
-                elif self.matrika[i][j] == 1 and self.gumbi[i][j]['image'] == self.zastava:
+                elif self.matrika[i][j] == 1 and self.gumbi[i][j]['text'] == ZASTAVA:
                     continue
-                elif self.polje.sosede(i, j, self.matrika) == 0:
-                    self.gumbi[i][j]['text'] = ' '
-                    self.gumbi[i][j].configure(relief=tk.SUNKEN)      
-                else: #self.polje[i][j] == cifra
-                    cifra = self.polje.sosede(i, j, self.matrika)
-                    self.gumbi[i][j].configure(relief=tk.SUNKEN, disabledforeground=BARVE[cifra], font=FONT)
-                    self.gumbi[i][j]['text'] = str(cifra)
+                elif self.matrika[i][j] == 0:
+                    if self.polje.sosede(i, j, self.matrika) == 0:
+                        self.gumbi[i][j]['text'] = ' '
+                        self.gumbi[i][j]['state'] = 'disabled'
+                        self.gumbi[i][j].configure(relief=tk.SUNKEN)
+                    else:
+                        cifra = self.polje.sosede(i, j, self.matrika)
+                        self.gumbi[i][j].configure(relief=tk.SUNKEN, disabledforeground=BARVE[cifra], font=FONT)
+                        self.gumbi[i][j]['text'] = str(cifra)                     
+
+    def pokazi_zastave(self):
+        for i in range(len(self.gumbi)):
+            for j in range(len(self.gumbi[i])):
+                if self.matrika[i][j] == 1:
+                    self.gumbi[i][j]['text'] = ZASTAVA
+                    self.gumbi[i][j].configure(font=FONT)
 
     def zakleni_gumbe(self):
             for i in range(len(self.gumbi)):
@@ -185,12 +192,12 @@ class Minolovec:
         self.win = True
         for i in range(len(self.gumbi)):
             for j in range(len(self.gumbi[i])):
-                if self.matrika[i][j] != 1 and self.gumbi[i][j]['state'] == 'normal':
+                if self.matrika[i][j] == 0 and (self.gumbi[i][j]['state'] == 'normal' or self.gumbi[i][j]['text'] == ZASTAVA):
                     self.win = False
         if self.win:
             self.pokazi_zastave()
             self.konec_igre = True
-            tk.messagebox.showinfo('Konec igre', 'Čestitke, uspelo vam je!')
+            tk.messagebox.showinfo('Zmaga', 'Čestitke, uspelo vam je!')
             self.zapisi_cas()
             self.zakleni_gumbe()
             
@@ -210,10 +217,5 @@ class Minolovec:
             print(('Minolovca s {0} vrsticami, {1} stolpci in {2} minami, vam je uspelo koncati v {3} sekundah.'.format(
                 self.vrstice, self.stolpci, self.stevilo_min, self.vrednost_casa)), file=rezultati)
 
-    def pokazi_zastave(self):
-        for i in range(len(self.gumbi)):
-            for j in range(len(self.gumbi[i])):
-                if self.matrika[i][j] == 1:
-                    self.gumbi[i][j]['image'] = self.zastava
         
 Minolovec()
