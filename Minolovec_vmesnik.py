@@ -134,7 +134,7 @@ class Minolovec:
             self.gumbi[i][j]['state'] = 'normal'
         elif self.gumbi[i][j]['text'] == ' ' and self.gumbi[i][j]['state'] == 'normal':
             self.gumbi[i][j]['text'] = ZASTAVA
-            self.gumbi[i][j].configure(font=FONT)
+            self.gumbi[i][j].configure(disabledforeground='black', font=FONT)
             self.gumbi[i][j]['state'] = 'disabled'
 
     def pokazi_cifro(self, i, j):
